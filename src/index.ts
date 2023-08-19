@@ -1,4 +1,5 @@
 import { Client, Guild, IntentsBitField, TextChannel } from 'discord.js';
+import { Logger } from './logger';
 
 // Time constants
 const ONE_MINUTE = 60 * 1_000;
@@ -12,8 +13,10 @@ const client = new Client({
 
 client.login(process.env.BOT_TOKEN);
 
+const logger = new Logger({ service: 'auto-void' });
+
 client.on('ready', async () => {
-  console.info('Connected to discord');
+  logger.info('Connected to discord');
 
   // Delete messages
   await deleteMessages();
@@ -36,7 +39,7 @@ const getChannel = async () => {
 
 const deleteMessages = async () => {
   try {
-    console.info('Deleting messages');
+    logger.info('Deleting messages');
 
     // Get the channel
     const channel = await getChannel();
@@ -53,11 +56,15 @@ const deleteMessages = async () => {
     // Attempt to delete all the messages
     const results = await Promise.allSettled(messagesToDelete.map(async message => message.delete()));
     const deleted = results.filter(result => result.status === 'fulfilled');
+    const failedToDelete = results.filter(result => result.status === 'rejected');
 
-    // Log how many were deleted/not deleted
-    console.info(`Deleted ${deleted.length}/${results.length} messages.`);
+    // Log how many failed to delete
+    if (failedToDelete.length) logger.info(`Failed to delete ${failedToDelete.length} messages.`);
+
+    // Log how many were deleted
+    logger.info(`Deleted ${deleted.length}/${messages.size} messages.`);
   } catch (error: unknown) {
-    console.error('Failed to delete messages', error);
+    logger.error('Failed to delete messages', { error });
   } finally {
     setTimeout(deleteMessages, TEN_MINUTES);
   }
