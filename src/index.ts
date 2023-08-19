@@ -23,29 +23,35 @@ client.on('ready', async () => {
 });
 
 let guild: Guild | undefined;
-let channel: TextChannel | undefined;
+let channels: TextChannel[];
 
-const getChannel = async () => {
-  if (channel) return channel;
+const getChannels = async () => {
+  if (channels) return channels;
 
   // Fetch the guild
   guild = client.guilds.cache.get('927461441051701280');
 
   // Fetch the channel
-  channel = await guild?.channels.fetch('1142291559388303520') as TextChannel;
+  channels = [
+    await guild?.channels.fetch('1142291559388303520') as TextChannel,
+    await guild?.channels.fetch('1142320223681253458') as TextChannel
+  ];
 
-  return channel;
+  return channels;
 };
 
 const deleteMessages = async () => {
   try {
     logger.info('Deleting messages');
 
-    // Get the channel
-    const channel = await getChannel();
+    // Get the channels
+    const channels = await getChannels();
 
     // Fetch all messages
-    const messages = await channel.messages.fetch({ limit: 100 });
+    const messages = await Promise.all(Array.from(channels).map(async channel => {
+      const messages = await channel.messages.fetch({ limit: 100 });
+      return Array.from(messages.values());
+    })).then(_ => _.flat());
 
     // Create timestamp
     const ONE_DAY_AGO = Date.now() - ONE_DAY;
@@ -62,7 +68,7 @@ const deleteMessages = async () => {
     if (failedToDelete.length) logger.info(`Failed to delete ${failedToDelete.length} messages.`);
 
     // Log how many were deleted
-    logger.info(`Deleted ${deleted.length}/${messages.size} messages.`);
+    logger.info(`Deleted ${deleted.length}/${messages.length} messages.`);
   } catch (error: unknown) {
     logger.error('Failed to delete messages', { error });
   } finally {
