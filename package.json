@@ -1,0 +1,19 @@
+{
+  "name": "auto-void",
+  "module": "src/index.ts",
+  "devDependencies": {
+    "@reflet/cron": "^1.3.1",
+    "@types/cron": "^2.0.1",
+    "bun-types": "latest",
+    "cron": "^2.3.1",
+    "discord.js": "^14.11.0",
+    "discordx": "^11.7.6",
+    "reflect-metadata": "^0.1.13",
+    "typescript": "^5.0.4"
+  },
+  "overrides": {
+    "cron": "$cron",
+    "@types/cron": "$@types/cron"
+  },
+  "type": "module"
+}
