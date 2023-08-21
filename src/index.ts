@@ -59,6 +59,8 @@ const deleteMessages = async () => {
     // Filter to only messages in the last 24 hours
     const messagesToDelete = messages.filter(message => message.createdTimestamp < ONE_DAY_AGO);
 
+    logger.info('Attempting to delete messages', { count: messagesToDelete.length });
+
     // Attempt to delete all the messages
     const results = await Promise.allSettled(messagesToDelete.map(async message => message.delete()));
     const deleted = results.filter(result => result.status === 'fulfilled');

@@ -25,8 +25,8 @@ type Meta = {
 
 const formatMeta = (meta: Meta) => {
     const splat = meta[Symbol.for('splat') as typeof splatSymbol];
-    if (splat && splat.length) return splat.length === 1 ? JSON.stringify(splat[0]) : JSON.stringify(splat);
-    return '';
+    const json = (splat && splat.length > 0) ? splat[0] : splat;
+    return json ? Object.entries(json).map(([key, value]) => `${key}=${value}`).join(' ') : '';
 };
 
 type Options = {
